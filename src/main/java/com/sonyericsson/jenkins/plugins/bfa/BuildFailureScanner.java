@@ -25,6 +25,7 @@
 
 package com.sonyericsson.jenkins.plugins.bfa;
 
+import static com.sonyericsson.jenkins.plugins.bfa.MetricsManager.addJobBuildCausesMetric;
 import static com.sonyericsson.jenkins.plugins.bfa.MetricsManager.incCounters;
 import static com.sonyericsson.jenkins.plugins.bfa.MetricsManager.UNKNOWNCAUSE;
 
@@ -34,6 +35,7 @@ import com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseDisplayData;
 import com.sonyericsson.jenkins.plugins.bfa.model.FailureCauseMatrixBuildAction;
 import com.sonyericsson.jenkins.plugins.bfa.model.FailureReader;
 import com.sonyericsson.jenkins.plugins.bfa.model.FoundFailureCause;
+import com.sonyericsson.jenkins.plugins.bfa.model.IFailureCauseMetricData;
 import com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty;
 import com.sonyericsson.jenkins.plugins.bfa.model.indication.FoundIndication;
 import com.sonyericsson.jenkins.plugins.bfa.model.indication.Indication;
@@ -218,19 +220,26 @@ public class BuildFailureScanner extends RunListener<Run> {
             }
 
 
+           FailureCauseBuildAction buildAction = new FailureCauseBuildAction(foundCauseList);
+           buildAction.setBuild(build);
+           build.addAction(buildAction);
+           final FailureCauseDisplayData data = buildAction.getFailureCauseDisplayData();
+
            if (!foundCauseList.isEmpty()) {
                incCounters(foundCauseList, PluginImpl.getInstance().isMetricSquashingEnabled());
+               addJobBuildCausesMetric(data.getLinks().getProjectDisplayName(), build, foundCauseList);
            } else {
+               ArrayList<IFailureCauseMetricData> unknownCauses = new ArrayList<>(
+                   Collections.singletonList(UNKNOWNCAUSE)
+               );
                incCounters(
-                   new ArrayList<>(Collections.singletonList(UNKNOWNCAUSE)),
+                   unknownCauses,
                    PluginImpl.getInstance().isMetricSquashingEnabled()
                 );
+               addJobBuildCausesMetric(data.getLinks().getProjectDisplayName(), build, unknownCauses);
            }
 
-            FailureCauseBuildAction buildAction = new FailureCauseBuildAction(foundCauseList);
-            buildAction.setBuild(build);
-            build.addAction(buildAction);
-            final FailureCauseDisplayData data = buildAction.getFailureCauseDisplayData();
+
             List<FailureCauseDisplayData> downstreamFailureCauses = data.getDownstreamFailureCauses();
 
             if (!downstreamFailureCauses.isEmpty()) {

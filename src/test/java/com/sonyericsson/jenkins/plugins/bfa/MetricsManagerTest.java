@@ -7,6 +7,7 @@ import com.sonyericsson.jenkins.plugins.bfa.model.FailureCause;
 import com.sonyericsson.jenkins.plugins.bfa.model.IFailureCauseMetricData;
 import com.sonyericsson.jenkins.plugins.bfa.model.indication.BuildLogIndication;
 import com.sonyericsson.jenkins.plugins.bfa.model.indication.Indication;
+//import hudson.model.Run;
 import jenkins.metrics.api.Metrics;
 
 import org.junit.Before;
@@ -42,6 +43,8 @@ public class MetricsManagerTest {
     @Mock
     private Counter counter;
 
+//    private String mockedJobDisplayName;
+//    private Run mockedJobBuild;
     private FailureCause mockedCause;
     private List<? extends IFailureCauseMetricData> mockedCauseList;
 
@@ -51,6 +54,8 @@ public class MetricsManagerTest {
     @Before
     public void setUp() {
         List<Indication> indications = new LinkedList<>();
+//        mockedJobDisplayName = "myJob";
+//        mockedJobBuild = mock(Run.class);
         Indication indication = new BuildLogIndication("something");
         indications.add(indication);
         mockedCause = new FailureCause("id", "myFailureCause", "description", "comment", new Date(),
@@ -93,4 +98,13 @@ public class MetricsManagerTest {
         verify(counter, times(mockedCauseList.size())).inc();
     }
 
+    /**
+     * Test that a job counter is incremented for found failure causes in a build.
+     */
+//    @Test
+//    public void testaddJobBuildCausesMetric() {
+//        addJobBuildCausesMetric(mockedJobDisplayName, mockedJobBuild, mockedCauseList);
+//
+//        verify(metricRegistry, times(2)).counter("jenkins_bfa.job.@myJob@.number.@1@.cause.@myFailureCause");
+//    }
 }
